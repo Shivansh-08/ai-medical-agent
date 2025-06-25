@@ -8,7 +8,7 @@ function Appheader() {
     {
       id: 1,
       name: "Home",
-      path: "/dashboard",
+      path: "/",
     },
     {
       id: 2,
@@ -18,12 +18,12 @@ function Appheader() {
     {
       id: 3,
       name: "Pricing",
-      path: "/pricing",
+      path: "/dashboard/billing",
     },
     {
       id: 4,
-      name: "Profile",
-      path: "/profile",
+      name: "Dashboard",
+      path: "/dashboard",
     },
   ];
   return (

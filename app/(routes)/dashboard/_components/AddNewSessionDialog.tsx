@@ -13,19 +13,39 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { ArrowRight, Loader2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import SuggestedDoctorCard from "./SuggestedDoctorCard";
 import type { doctorAgent } from "./SuggestedDoctorCard";
+import { useAuth } from "@clerk/nextjs";
+import { SessionDetail } from "../medical-agent/[sessionId]/page";
 
 function AddNewSessionDialog() {
   const [note, setNote] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [suggestedDoctors, setSuggestedDoctors] = useState<doctorAgent[]>([]);
-  const [selectedDoctor, setSelectedDoctor] = useState<doctorAgent | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<doctorAgent | null>(
+    null
+  );
   const [step, setStep] = useState<"symptoms" | "doctors">("symptoms");
   const router = useRouter();
+  const [historyList,setHistoryList] = useState<SessionDetail[]>([]);
+
+  const { has } = useAuth();
+  //@ts-ignore
+  const paidUser = has && has({ plan: "pro" });
+
+  
+      useEffect(()=>{
+            GetHistoryList();
+      },[])
+  
+      const GetHistoryList=async()=>{
+        const result = await axios.get('/api/session-chat?sessionId=all');
+        console.log(result.data)
+        setHistoryList(result.data)
+      }
 
   const onClickNext = async () => {
     setLoading(true);
@@ -51,7 +71,7 @@ function AddNewSessionDialog() {
       });
 
       if (result.data?.sessionId) {
-        router.push('/dashboard/medical-agent/' + result.data.sessionId);
+        router.push("/dashboard/medical-agent/" + result.data.sessionId);
       }
     } catch (error) {
       console.error("Error starting consultation:", error);
@@ -71,16 +91,17 @@ function AddNewSessionDialog() {
     <div>
       <Dialog onOpenChange={(open) => !open && resetDialog()}>
         <DialogTrigger asChild>
-          <Button className="mt-3">+ Start a Consultation</Button>
+          <Button className="mt-3" disabled={!paidUser && historyList?.length>=1}>
+            + Start a Consultation
+          </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add Basic Details</DialogTitle>
             <DialogDescription>
-              {step === "symptoms" 
+              {step === "symptoms"
                 ? "Add Symptoms or Any Other Details"
-                : "Select the doctor"
-              }
+                : "Select the doctor"}
             </DialogDescription>
           </DialogHeader>
 
@@ -135,7 +156,6 @@ function AddNewSessionDialog() {
                 <Button
                   disabled={!selectedDoctor || loading}
                   onClick={onStartConsultation}
-                  
                 >
                   {loading ? <Loader2 className="animate-spin mr-2" /> : null}
                   Start Consultation <ArrowRight className="ml-2 h-4 w-4" />
