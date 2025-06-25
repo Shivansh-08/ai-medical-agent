@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "@/config/db";// assuming you have db setup with something like Kysely or Drizzle
 import { sessionChatTable } from "@/config/schema"; // assuming this is your table schema
 import { currentUser } from "@clerk/nextjs/server"; // or your own auth
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const { notes, selectedDoctor } = await req.json();
@@ -53,8 +53,20 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // 5. Query database
-    const result = await db
+    if(sessionId=='all'){
+
+        const result = await db
+      .select()
+      .from(sessionChatTable)
+      //@ts-ignore
+      .where(eq(sessionChatTable.createdBy, user?.primaryEmailAddress?.emailAddress))
+      .orderBy(desc(sessionChatTable.id));
+
+
+      return NextResponse.json(result);
+
+    }else{
+       const result = await db
       .select()
       .from(sessionChatTable)
       .where(eq(sessionChatTable.sessionId, sessionId));
@@ -69,6 +81,10 @@ export async function GET(req: NextRequest) {
 
     // 7. Return the session data
     return NextResponse.json(result[0]);
+    }
+
+    // 5. Query database
+   
     
   } catch (error) {
     console.error('API Error:', error);

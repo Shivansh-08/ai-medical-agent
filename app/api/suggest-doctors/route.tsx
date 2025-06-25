@@ -6,6 +6,7 @@ const keywordMap: Record<string, string> = {
   heart: "Cardiologist",
   skin: "Dermatologist",
   mental: "Psychologist",
+  depression:"Psychologist",
   diet: "Nutritionist",
   teeth: "Dentist",
   tooth: "Dentist",
