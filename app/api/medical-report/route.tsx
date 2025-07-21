@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     console.log("✉️ Sending request to DeepSeek R1 via OpenRouter...");
 
     const completion = await openai.chat.completions.create({
-      model: "google/gemini-2.5-flash-preview-05-20", // ✅ DeepSeek R1 model alias
+      model: "google/gemma-3n-e4b-it:free", //
       messages: [
         { role: "system", content: REPORT_GEN_PROMPT },
         { role: "user", content: UserInput },
